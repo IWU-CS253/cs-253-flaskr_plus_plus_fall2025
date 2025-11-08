@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block body %}
+  <!-- FLASKR PLUS CHANGE: filter UI -->
+  <form method="get" action="{{ url_for('show_entries') }}" style="margin-bottom:1rem;">
+    <label for="cat">Filter by category:</label>
+    <select id="cat" name="category">
+      <option value="">-- All categories --</option>
+      {% for cat in categories %}
+        <option value="{{ cat['category'] }}" {{ 'selected' if request.args.get('category') == cat['category'] else '' }}>{{ cat['category'] }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Apply</button>
+    {% if request.args.get('category') %}
+      <a href="{{ url_for('show_entries') }}">Clear filter</a>
+    {% endif %}
+  </form>
+
+  <ul class="entries">
+  {% for entry in entries %}
+    <li>
+      <h2>{{ entry['title'] }}</h2>
+      <div class="meta">Category: <strong>{{ entry['category'] or '—' }}</strong> <!-- FLASKR PLUS CHANGE --></div>
+      <div class="body">{{ entry['text'] }}</div>
+      <!-- FLASKR PLUS CHANGE: delete button -->
+      <form method="post" action="{{ url_for('delete_entry') }}" onsubmit="return confirm('Delete this post?');">
+        <input type="hidden" name="id" value="{{ entry['id'] }}">
+        <button type="submit">Delete</button>
+      </form>
+    </li>
+  {% else %}
+    <li><em>No entries here so far</em></li>
+  {% endfor %}
+  </ul>
+
+  {% if session.logged_in %}
+  <h2>Add a New Entry</h2>
+  <form action="{{ url_for('add_entry') }}" method="post" class="add-entry">
+    <dl>
+      <dt>Title:
+      <dd><input type="text" size="30" name="title">
+      <dt>Text:
+      <dd><textarea name="text" rows="5" cols="40"></textarea>
+      <!-- FLASKR PLUS CHANGE: category field -->
+      <dt>Category:
+      <dd><input type="text" size="30" name="category" placeholder="Any text (e.g., Personal, School, ... )">
+      <dd><input type="submit" value="Share">
+    </dl>
+  </form>
+  {% endif %}
+{% endblock %}
